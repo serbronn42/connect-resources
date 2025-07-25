@@ -1,0 +1,338 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "Initiate Process Request",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": -175,
+      "y": 71
+    },
+    "ActionMetadata": {
+      "4e2c6d40-53ea-4aec-8270-1e2610ca6320": {
+        "position": {
+          "x": 1557,
+          "y": 389
+        }
+      },
+      "Set Request Id": {
+        "position": {
+          "x": 347,
+          "y": 56
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "Attributes": {
+            "proxy_request_id": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicParams": [
+          "proxy_request_id"
+        ]
+      },
+      "0194c3d2-94f9-4565-9b7c-3284387e08a0": {
+        "position": {
+          "x": 582,
+          "y": 471
+        }
+      },
+      "Initiate Process Request": {
+        "position": {
+          "x": 59,
+          "y": 58
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy"
+          },
+          "LambdaInvocationAttributes": {
+            "contact_id": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "proxy_request_process": false,
+          "proxy_request_type": false,
+          "contact_id": true
+        }
+      },
+      "Get Process Results": {
+        "position": {
+          "x": 641,
+          "y": 52
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy"
+          },
+          "LambdaInvocationAttributes": {
+            "proxy_request_id": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "proxy_request_type": false,
+          "proxy_request_id": true
+        }
+      },
+      "Check proxy_status": {
+        "position": {
+          "x": 1208,
+          "y": 45
+        },
+        "isFriendlyName": true,
+        "conditions": [],
+        "conditionMetadata": [
+          {
+            "id": "8d55ea88-515f-40e0-bd35-1c1a41c45c37",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_INITIATED"
+          },
+          {
+            "id": "283736ee-6e02-4bd8-a820-9f5dc938eed9",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_COMPLETED"
+          },
+          {
+            "id": "5286eb23-6fa7-410f-a190-e582057f683c",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_FAILED"
+          }
+        ]
+      },
+      "670d2968-db32-4365-81af-fcddbaf9016e": {
+        "position": {
+          "x": 933,
+          "y": 54
+        },
+        "parameters": {
+          "Attributes": {
+            "proxy_status": {
+              "useDynamic": true
+            },
+            "gigaml_call_reason": {
+              "useDynamic": true
+            },
+            "gigaml_call_status": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicParams": [
+          "proxy_status",
+          "gigaml_call_reason",
+          "gigaml_call_status"
+        ]
+      }
+    },
+    "Annotations": [],
+    "name": "Contact Center Backend - Get Call GigaML",
+    "description": "update 6-24-2025",
+    "status": "published",
+    "hash": {}
+  },
+  "Actions": [
+    {
+      "Parameters": {},
+      "Identifier": "4e2c6d40-53ea-4aec-8270-1e2610ca6320",
+      "Type": "EndFlowModuleExecution",
+      "Transitions": {}
+    },
+    {
+      "Parameters": {
+        "Attributes": {
+          "proxy_request_id": "$.External.proxy_request_id"
+        },
+        "TargetContact": "Current"
+      },
+      "Identifier": "Set Request Id",
+      "Type": "UpdateContactAttributes",
+      "Transitions": {
+        "NextAction": "Get Process Results",
+        "Errors": [
+          {
+            "NextAction": "Get Process Results",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LoopCount": "3"
+      },
+      "Identifier": "0194c3d2-94f9-4565-9b7c-3284387e08a0",
+      "Type": "Loop",
+      "Transitions": {
+        "NextAction": "4e2c6d40-53ea-4aec-8270-1e2610ca6320",
+        "Conditions": [
+          {
+            "NextAction": "Initiate Process Request",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ContinueLooping"
+              ]
+            }
+          },
+          {
+            "NextAction": "4e2c6d40-53ea-4aec-8270-1e2610ca6320",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "DoneLooping"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:${aws_region}:${account_id}:function:fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "proxy_request_process": "PROCESS_GET_CALL_GIGAML",
+          "proxy_request_type": "INITIATE",
+          "contact_id": "$.ContactId"
+        },
+        "ResponseValidation": {
+          "ResponseType": "JSON"
+        }
+      },
+      "Identifier": "Initiate Process Request",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "Set Request Id",
+        "Errors": [
+          {
+            "NextAction": "0194c3d2-94f9-4565-9b7c-3284387e08a0",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:${aws_region}:${account_id}:function:fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "proxy_request_type": "GET_RESULTS",
+          "proxy_request_id": "$.Attributes.proxy_request_id"
+        },
+        "ResponseValidation": {
+          "ResponseType": "JSON"
+        }
+      },
+      "Identifier": "Get Process Results",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "670d2968-db32-4365-81af-fcddbaf9016e",
+        "Errors": [
+          {
+            "NextAction": "670d2968-db32-4365-81af-fcddbaf9016e",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "ComparisonValue": "$.Attributes.proxy_status"
+      },
+      "Identifier": "Check proxy_status",
+      "Type": "Compare",
+      "Transitions": {
+        "NextAction": "0194c3d2-94f9-4565-9b7c-3284387e08a0",
+        "Conditions": [
+          {
+            "NextAction": "Get Process Results",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_INITIATED"
+              ]
+            }
+          },
+          {
+            "NextAction": "4e2c6d40-53ea-4aec-8270-1e2610ca6320",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_COMPLETED"
+              ]
+            }
+          },
+          {
+            "NextAction": "0194c3d2-94f9-4565-9b7c-3284387e08a0",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_FAILED"
+              ]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "0194c3d2-94f9-4565-9b7c-3284387e08a0",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "Attributes": {
+          "proxy_status": "$.External.proxy_status",
+          "gigaml_call_reason": "$.External.gigaml_call_reason",
+          "gigaml_call_status": "$.External.gigaml_call_status"
+        },
+        "TargetContact": "Current"
+      },
+      "Identifier": "670d2968-db32-4365-81af-fcddbaf9016e",
+      "Type": "UpdateContactAttributes",
+      "Transitions": {
+        "NextAction": "Check proxy_status",
+        "Errors": [
+          {
+            "NextAction": "Check proxy_status",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    }
+  ],
+  "Settings": {
+    "InputParameters": [],
+    "OutputParameters": [],
+    "Transitions": [
+      {
+        "DisplayName": "Success",
+        "ReferenceName": "Success",
+        "Description": ""
+      },
+      {
+        "DisplayName": "Error",
+        "ReferenceName": "Error",
+        "Description": ""
+      }
+    ]
+  }
+}

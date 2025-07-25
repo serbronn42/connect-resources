@@ -1,0 +1,384 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "Initiate Process Request",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": -116,
+      "y": -28.8
+    },
+    "ActionMetadata": {
+      "df71d09b-af41-4bd9-ae63-09ff834b829e": {
+        "position": {
+          "x": 1243.2,
+          "y": 75.2
+        }
+      },
+      "Check proxy_status": {
+        "position": {
+          "x": 967.2,
+          "y": -178.4
+        },
+        "isFriendlyName": true,
+        "conditions": [],
+        "conditionMetadata": [
+          {
+            "id": "b862b387-bbcd-4969-93b8-dd4d41270814",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_INITIATED"
+          },
+          {
+            "id": "aa8d548a-e3cf-4bb6-bd0c-d34bd3790e7c",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_COMPLETED"
+          },
+          {
+            "id": "c01390bd-e4cd-4304-bf65-3d459a5c2998",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_FAILED"
+          }
+        ]
+      },
+      "Allow Contact-Center to Process Request": {
+        "position": {
+          "x": 1200.8,
+          "y": -298.4
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "TimeLimitSeconds": {
+            "unit": 1
+          }
+        },
+        "timeoutUnit": {
+          "display": "Seconds",
+          "value": "second"
+        }
+      },
+      "44588096-00d7-44d5-941a-9b231293336d": {
+        "position": {
+          "x": 744.8,
+          "y": -192
+        },
+        "parameters": {
+          "Attributes": {
+            "proxy_status": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicParams": [
+          "proxy_status"
+        ]
+      },
+      "Get Process Results": {
+        "position": {
+          "x": 512.8,
+          "y": -192
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy"
+          },
+          "LambdaInvocationAttributes": {
+            "proxy_request_id": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "proxy_request_type": false,
+          "proxy_request_id": true
+        }
+      },
+      "7c215e34-abdf-4c10-8990-d6acd31529c7": {
+        "position": {
+          "x": 551.2,
+          "y": 156
+        }
+      },
+      "Set Request Id": {
+        "position": {
+          "x": 279.2,
+          "y": -188.8
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "Attributes": {
+            "proxy_request_id": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicParams": [
+          "proxy_request_id"
+        ]
+      },
+      "Initiate Process Request": {
+        "position": {
+          "x": 44,
+          "y": -168.8
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy"
+          },
+          "LambdaInvocationAttributes": {
+            "contactId": {
+              "useDynamic": true
+            },
+            "instanceId": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "proxy_request_process": false,
+          "proxy_request_type": false,
+          "contactId": true,
+          "instanceId": true,
+          "customer_idle": false,
+          "customer_disconnect": false,
+          "agent_idle": false,
+          "agent_disconnect": false
+        }
+      }
+    },
+    "Annotations": [],
+    "name": "Contact Center Backend - Idle-Time",
+    "description": "",
+    "status": "published",
+    "hash": {}
+  },
+  "Actions": [
+    {
+      "Parameters": {},
+      "Identifier": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+      "Type": "EndFlowModuleExecution",
+      "Transitions": {}
+    },
+    {
+      "Parameters": {
+        "ComparisonValue": "$.Attributes.proxy_status"
+      },
+      "Identifier": "Check proxy_status",
+      "Type": "Compare",
+      "Transitions": {
+        "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+        "Conditions": [
+          {
+            "NextAction": "Allow Contact-Center to Process Request",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_INITIATED"
+              ]
+            }
+          },
+          {
+            "NextAction": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_COMPLETED"
+              ]
+            }
+          },
+          {
+            "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_FAILED"
+              ]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "TimeLimitSeconds": "2"
+      },
+      "Identifier": "Allow Contact-Center to Process Request",
+      "Type": "Wait",
+      "Transitions": {
+        "NextAction": "Get Process Results",
+        "Conditions": [
+          {
+            "NextAction": "Get Process Results",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "WaitCompleted"
+              ]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "Get Process Results",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "Attributes": {
+          "proxy_status": "$.External.proxy_status"
+        },
+        "TargetContact": "Current"
+      },
+      "Identifier": "44588096-00d7-44d5-941a-9b231293336d",
+      "Type": "UpdateContactAttributes",
+      "Transitions": {
+        "NextAction": "Check proxy_status",
+        "Errors": [
+          {
+            "NextAction": "Check proxy_status",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:${aws_region}:${account_id}:function:fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "proxy_request_type": "GET_RESULTS",
+          "proxy_request_id": "$.Attributes.proxy_request_id"
+        },
+        "ResponseValidation": {
+          "ResponseType": "JSON"
+        }
+      },
+      "Identifier": "Get Process Results",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "44588096-00d7-44d5-941a-9b231293336d",
+        "Errors": [
+          {
+            "NextAction": "44588096-00d7-44d5-941a-9b231293336d",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LoopCount": "3"
+      },
+      "Identifier": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+      "Type": "Loop",
+      "Transitions": {
+        "NextAction": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+        "Conditions": [
+          {
+            "NextAction": "Initiate Process Request",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ContinueLooping"
+              ]
+            }
+          },
+          {
+            "NextAction": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "DoneLooping"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "Attributes": {
+          "proxy_request_id": "$.External.proxy_request_id"
+        },
+        "TargetContact": "Current"
+      },
+      "Identifier": "Set Request Id",
+      "Type": "UpdateContactAttributes",
+      "Transitions": {
+        "NextAction": "Get Process Results",
+        "Errors": [
+          {
+            "NextAction": "Get Process Results",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:${aws_region}:${account_id}:function:fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "proxy_request_process": "PROCESS_UPDATE_PARTICIPANT_CONFIG",
+          "proxy_request_type": "INITIATE",
+          "contactId": "$.ContactId",
+          "instanceId": "$.InstanceARN",
+          "customer_idle": "5",
+          "customer_disconnect": "5",
+          "agent_idle": "10",
+          "agent_disconnect": "5"
+        },
+        "ResponseValidation": {
+          "ResponseType": "JSON"
+        }
+      },
+      "Identifier": "Initiate Process Request",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "Set Request Id",
+        "Errors": [
+          {
+            "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    }
+  ],
+  "Settings": {
+    "InputParameters": [],
+    "OutputParameters": [],
+    "Transitions": [
+      {
+        "DisplayName": "Success",
+        "ReferenceName": "Success",
+        "Description": ""
+      },
+      {
+        "DisplayName": "Error",
+        "ReferenceName": "Error",
+        "Description": ""
+      }
+    ]
+  }
+}

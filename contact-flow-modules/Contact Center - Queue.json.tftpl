@@ -1,0 +1,381 @@
+{
+  "Version": "2019-10-30",
+  "StartAction": "Initiate Process Request",
+  "Metadata": {
+    "entryPointPosition": {
+      "x": -116,
+      "y": -28.8
+    },
+    "ActionMetadata": {
+      "Allow Contact-Center to Process Request": {
+        "position": {
+          "x": 1200.8,
+          "y": -298.4
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "TimeLimitSeconds": {
+            "unit": 1
+          }
+        },
+        "timeoutUnit": {
+          "display": "Seconds",
+          "value": "second"
+        }
+      },
+      "df71d09b-af41-4bd9-ae63-09ff834b829e": {
+        "position": {
+          "x": 1263.2,
+          "y": -56
+        }
+      },
+      "Get Process Results": {
+        "position": {
+          "x": 512,
+          "y": -192.8
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy"
+          },
+          "LambdaInvocationAttributes": {
+            "proxy_request_id": {
+              "useDynamic": true
+            },
+            "UUID": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "proxy_request_type": false,
+          "proxy_request_id": true,
+          "UUID": true
+        }
+      },
+      "Check proxy_status": {
+        "position": {
+          "x": 967.2,
+          "y": -178.4
+        },
+        "isFriendlyName": true,
+        "conditions": [],
+        "conditionMetadata": [
+          {
+            "id": "0cad2e8a-cad2-4587-afd2-2fc072846934",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_INITIATED"
+          },
+          {
+            "id": "41b4cb3e-4115-4ce3-bd45-c5ffe2e60b79",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_COMPLETED"
+          },
+          {
+            "id": "91cabf52-ccae-4bb7-be37-c7f270ed5320",
+            "operator": {
+              "name": "Equals",
+              "value": "Equals",
+              "shortDisplay": "="
+            },
+            "value": "STATUS_FAILED"
+          }
+        ]
+      },
+      "44588096-00d7-44d5-941a-9b231293336d": {
+        "position": {
+          "x": 744,
+          "y": -192.8
+        },
+        "parameters": {
+          "Attributes": {
+            "proxy_status": {
+              "useDynamic": true
+            },
+            "isInQueue": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicParams": [
+          "proxy_status",
+          "isInQueue"
+        ]
+      },
+      "Set Request Id": {
+        "position": {
+          "x": 278.4,
+          "y": -189.6
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "Attributes": {
+            "proxy_request_id": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicParams": [
+          "proxy_request_id"
+        ]
+      },
+      "7c215e34-abdf-4c10-8990-d6acd31529c7": {
+        "position": {
+          "x": 551.2,
+          "y": 156
+        }
+      },
+      "Initiate Process Request": {
+        "position": {
+          "x": 44,
+          "y": -168.8
+        },
+        "isFriendlyName": true,
+        "parameters": {
+          "LambdaFunctionARN": {
+            "displayName": "fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy"
+          },
+          "LambdaInvocationAttributes": {
+            "uuid": {
+              "useDynamic": true
+            }
+          }
+        },
+        "dynamicMetadata": {
+          "proxy_request_process": false,
+          "proxy_request_type": false,
+          "uuid": true
+        }
+      }
+    },
+    "Annotations": [],
+    "name": "Contact Center Backend - ATO Queue",
+    "description": "",
+    "status": "published",
+    "hash": {}
+  },
+  "Actions": [
+    {
+      "Parameters": {
+        "TimeLimitSeconds": "2"
+      },
+      "Identifier": "Allow Contact-Center to Process Request",
+      "Type": "Wait",
+      "Transitions": {
+        "NextAction": "Get Process Results",
+        "Conditions": [
+          {
+            "NextAction": "Get Process Results",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "WaitCompleted"
+              ]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "Get Process Results",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {},
+      "Identifier": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+      "Type": "EndFlowModuleExecution",
+      "Transitions": {}
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:${aws_region}:${account_id}:function:fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "proxy_request_type": "GET_RESULTS",
+          "proxy_request_id": "$.Attributes.proxy_request_id",
+          "UUID": "$.External.uuid"
+        },
+        "ResponseValidation": {
+          "ResponseType": "JSON"
+        }
+      },
+      "Identifier": "Get Process Results",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "44588096-00d7-44d5-941a-9b231293336d",
+        "Errors": [
+          {
+            "NextAction": "44588096-00d7-44d5-941a-9b231293336d",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "ComparisonValue": "$.Attributes.proxy_status"
+      },
+      "Identifier": "Check proxy_status",
+      "Type": "Compare",
+      "Transitions": {
+        "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+        "Conditions": [
+          {
+            "NextAction": "Allow Contact-Center to Process Request",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_INITIATED"
+              ]
+            }
+          },
+          {
+            "NextAction": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_COMPLETED"
+              ]
+            }
+          },
+          {
+            "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "STATUS_FAILED"
+              ]
+            }
+          }
+        ],
+        "Errors": [
+          {
+            "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+            "ErrorType": "NoMatchingCondition"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "Attributes": {
+          "proxy_status": "$.External.proxy_status",
+          "isInQueue": "$.External.isInQueue"
+        },
+        "TargetContact": "Current"
+      },
+      "Identifier": "44588096-00d7-44d5-941a-9b231293336d",
+      "Type": "UpdateContactAttributes",
+      "Transitions": {
+        "NextAction": "Check proxy_status",
+        "Errors": [
+          {
+            "NextAction": "Check proxy_status",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "Attributes": {
+          "proxy_request_id": "$.External.proxy_request_id"
+        },
+        "TargetContact": "Current"
+      },
+      "Identifier": "Set Request Id",
+      "Type": "UpdateContactAttributes",
+      "Transitions": {
+        "NextAction": "Get Process Results",
+        "Errors": [
+          {
+            "NextAction": "Get Process Results",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LoopCount": "3"
+      },
+      "Identifier": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+      "Type": "Loop",
+      "Transitions": {
+        "NextAction": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+        "Conditions": [
+          {
+            "NextAction": "Initiate Process Request",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "ContinueLooping"
+              ]
+            }
+          },
+          {
+            "NextAction": "df71d09b-af41-4bd9-ae63-09ff834b829e",
+            "Condition": {
+              "Operator": "Equals",
+              "Operands": [
+                "DoneLooping"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "Parameters": {
+        "LambdaFunctionARN": "arn:aws:lambda:${aws_region}:${account_id}:function:fenrir-eaa-eng-contact-center-backend-${environment}-connectproxy",
+        "InvocationTimeLimitSeconds": "8",
+        "LambdaInvocationAttributes": {
+          "proxy_request_process": "PROCESS_CHECK_ATO_QUEUE ",
+          "proxy_request_type": "INITIATE",
+          "uuid": "$.Attributes.sf_customer_uuid"
+        },
+        "ResponseValidation": {
+          "ResponseType": "JSON"
+        }
+      },
+      "Identifier": "Initiate Process Request",
+      "Type": "InvokeLambdaFunction",
+      "Transitions": {
+        "NextAction": "Set Request Id",
+        "Errors": [
+          {
+            "NextAction": "7c215e34-abdf-4c10-8990-d6acd31529c7",
+            "ErrorType": "NoMatchingError"
+          }
+        ]
+      }
+    }
+  ],
+  "Settings": {
+    "InputParameters": [],
+    "OutputParameters": [],
+    "Transitions": [
+      {
+        "DisplayName": "Success",
+        "ReferenceName": "Success",
+        "Description": ""
+      },
+      {
+        "DisplayName": "Error",
+        "ReferenceName": "Error",
+        "Description": ""
+      }
+    ]
+  }
+}
