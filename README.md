@@ -1,7 +1,7 @@
 Amazon Connect Resource  Deployment
 
 #connect-flows
-This repository is a sample that can be used to deploy amazon connect resources. This repo focuses on contact flow and modules resources.
+This repository is a sample that can be used to deploy amazon connect resources. This repo focuses on contact flow and modules resources. There are 2 bash scripts in the top level directory (replace_arns.sh and replace_lambda_arns.sh). The replace_arns.sh script replaces the arns for resources(queues, flows, modules etc) other than Lambda with the variables defined in the locals.tf or dev.auto.tfvars file while the replace_lambda_arns.sh specifically replaces the region, environment and account-id. Since the lambda function Name/ID would likely remain the same across all environments unlike other resources that would have different IDs
 
 # Environments & Mapping
 platform-development ⇒ Amazon Connect Development (as labeled in Okta)
